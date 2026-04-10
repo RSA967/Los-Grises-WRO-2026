@@ -5,12 +5,17 @@ Official repository of Team Los Grises for the **Future Engineers - World Robot 
 <img width="1000" height="500" alt="team-image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/9e32aee27e9ebda8a6da08e632b9680e6d41e43a/LOS_GRISES_1.webp" />
 </div>
 
-El código de nuestro robot está dividido en varias partes (módulos) que ayudan a que el robot funcione correctamente y pueda interactuar con el mundo real. Cada módulo tiene una función diferente, pero todos trabajan juntos.
-Uno de los módulos más importantes es el de la cámara, donde usamos el sensor "HuskyLens",este sensor funciona como “los ojos” del robot, ya que puede reconocer colores gracias a esto, el robot puede detectar objetos que ya fueron entrenados previamente y obtener información como su posición (X y Y) y su tamaño (ancho y alto).
-Otro módulo es el que controla el funcionamiento del programa. Este hace que el robot esté constantemente revisando si detecta algún objeto. También incluye el uso de un botón, que permite detener el programa cuando sea necesario.
-También tenemos el módulo de procesamiento de datos. Aquí, el robot toma la información que recibe de la cámara y la guarda en variables. Por ahora, estos datos se muestran en la pantalla, pero después pueden servir para que el robot tome decisiones, como moverse hacia un objeto y/o esquivarlo.
-El código se relaciona con los componentes electromecánicos del robot, como los motores, el regulador y los sensores. Los motores permiten que el robot se mueva, y el regulador controla la energía que reciben. Aunque en este código todavía no se controlan directamente los motores, la información de la cámara será utilizada después para decidir cómo moverse.
-Para usar el código, primero lo escribimos en el entorno de programación del robot,después se revisa y se compila para asegurarnos de que no tenga errores
+Our robot's code is divided into several parts (modules) that help the robot function correctly and interact with the real world. Each module has a different function, but they all work together.
 
-Finalmente, se sube al controlador del robot usando un cable USB. Una vez cargado,el robot puede ejecutar el programa y empezar a detectar objetos.
-En conclusión este código permite que el robot vea su entorno usando la cámara y es la base para que en el futuro pueda moverse y tomar decisiones automáticamente
+One of the most important modules is the camera module, where we use the "HuskyLens" sensor. This sensor acts as the robot's "eyes," as it can recognize colors. Thanks to this, the robot can detect objects that have been previously trained and obtain information such as their position (X and Y) and size (width and height).
+
+Another module controls the program's operation. This module makes the robot constantly check if it detects any objects. It also includes a button that allows the program to be stopped when necessary.
+We also have the data processing module. Here, the robot takes the information it receives from the camera and stores it in variables. For now, this data is displayed on the screen, but later it can be used by the robot to make decisions, such as moving toward an object and/or avoiding it.
+
+The code relates to the robot's electromechanical components, such as the motors, the controller, and the sensors. The motors allow the robot to move, and the controller regulates the power they receive. Although the motors are not directly controlled in this code, the camera's information will be used later to determine how to move.
+
+To use the code, we first write it in the robot's programming environment, then review and compile it to ensure it is error-free.
+
+Finally, it is uploaded to the robot's controller using a USB cable. Once uploaded, the robot can run the program and begin detecting objects.
+
+In conclusion, this code allows the robot to perceive its surroundings using the camera and is the foundation for future automated movement and decision-making.
