@@ -40,5 +40,16 @@ Role: Coach and founder.
 "An engineer and professor founded the Los Grises Superiores in 2014, since then with outstanding national and international participations."
 
 
+Name: Rodolfo Iván Sánchez Andaverde
+
+Age: 14 years old
+
+
+
+Role: Programmer
+
+My robotics story is that I started programming and building robots when I was very little. I always wanted to build more and I never got tired of it. I can tell you that I started when I was 9 years old, and I had the opportunity to compete in the WRO Future Engineers competition, and I didn't want to miss it.
+
+
 
 
