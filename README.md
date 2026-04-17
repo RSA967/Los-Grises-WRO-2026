@@ -51,5 +51,15 @@ Role: Programmer
 My robotics story is that I started programming and building robots when I was very little. I always wanted to build more and I never got tired of it. I can tell you that I started when I was 9 years old, and I had the opportunity to compete in the WRO Future Engineers competition, and I didn't want to miss it.
 
 
+Name: Carlos Samuel Cortes Esteban
 
+Age: 14
+
+<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="
+                  
+Role: Builder
+
+-Carlos Samuel Cortes Esteban
+
+Ever since I was little, robotics has always fascinated me, but it wasn't until I started high school that I could really begin. I enrolled in PCA (Advanced Curriculum Program), and that's where I've been learning to program and build things. I also took some courses at Tec de Monterrey, and last summer I took the opportunity to continue learning at the Normal Superior (Teacher Training College). Little by little, what began as a childhood curiosity has become something I'm preparing myself for seriously.
 
