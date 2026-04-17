@@ -27,7 +27,18 @@ Another important aspect is code optimization. Efforts are made to reduce execut
 
 Finally, this system is designed with future development in mind. Its modular structure allows the integration of new technologies, such as more advanced artificial intelligence algorithms, autonomous navigation systems, and improved interaction with the environment. This makes the robot a scalable platform capable of evolving and adapting to new challenges.
 
-In conclusion, the developed code provides a solid foundation for the robot’s operation. It enables environmental perception, data processing, and preparation for autonomous decision-making. Thanks to its modular design, integration with sensors, and focus on continuous improvement, the robot has the potential to develop increasingly complex behaviors, which are essential for success in competitions such as WRO and in the field of robotics in general.
+In conclusion, the developed code provides a solid foundation for the robot’s operation. It enables environmental perception, data processing, and preparation for autonomous decision-making. Thanks to its modular design, integration with sensors, and focus on continuous improvement, the robot has the potential to developincreasingly complex behaviors, which are essential for success in competitions such as WRO and in the field of robotics in general.
+
+TEAM MEMBERS
+---------
+Coach:Eduardo Alvarado Gonzalez
+
+Age:40
+
+Role: Coach and founder.
+
+"An engineer and professor founded the Los Grises Superiores in 2014, since then with outstanding national and international participations."
+
 
 
 
