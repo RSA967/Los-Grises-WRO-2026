@@ -44,7 +44,7 @@ Name: Rodolfo Iván Sánchez Andaverde
 
 Age: 14 years old
 
-
+<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="
 
 Role: Programmer
 
