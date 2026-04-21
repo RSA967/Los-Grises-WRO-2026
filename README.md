@@ -68,7 +68,7 @@ Name: Dante Campos Villarreal
 
 Age: 14
 
-<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="
+<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/Captura%20de%20pantalla%202026-04-20%20212642.jpg?raw=true" /></div>
 
 Role: Electronics Technician
 
