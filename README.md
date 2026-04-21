@@ -63,3 +63,13 @@ Role: Builder
 
 Ever since I was little, robotics has always fascinated me, but it wasn't until I started high school that I could really begin. I enrolled in PCA (Advanced Curriculum Program), and that's where I've been learning to program and build things. I also took some courses at Tec de Monterrey, and last summer I took the opportunity to continue learning at the Normal Superior (Teacher Training College). Little by little, what began as a childhood curiosity has become something I'm preparing myself for seriously.
 
+
+Name: Dante Campos Villarreal
+
+Age: 14
+
+<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="
+
+Role: Electronics Technician
+
+Since I was little, I didn't know robotics existed until I entered a program called PCA in high school. There, I met the robotics and computer science teacher, and from that moment on, I began to learn more and more.
