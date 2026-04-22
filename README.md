@@ -86,3 +86,6 @@ Since I was little, I didn't know robotics existed until I entered a program cal
 |:--:|:--:|
 | <img width="500" height="500" alt="Top" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/WhatsApp%20Image%202026-04-21%20at%207.39.36%20PM.jpeg?raw=true" /> | <img width="500" height="500" alt="Bottom" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/WhatsApp%20Image%202026-04-21%20at%207.39.36%20PM%20(1).jpeg?raw=true" /> |
 
+| Left | Right |
+|:--:|:--:|
+| <img width="500" height="500" alt="Left" src="
