@@ -73,3 +73,11 @@ Age: 14
 Role: Electronics Technician
 
 Since I was little, I didn't know robotics existed until I entered a program called PCA in high school. There, I met the robotics and computer science teacher, and from that moment on, I began to learn more and more.
+
+## Vehicle Photos
+
+<div align="center">
+
+| Front | Back |
+|:--:|:--:|
+<img width="500" height="500" alt="image" src="
