@@ -2,7 +2,7 @@
 
 Official repository of Team Los Grises for the **Future Engineers - World Robot O1ympiad 2026**.
 <div align="center">
-<img width="1000" height="500" alt="team-image" src="" />
+<img width="1000" height="500" alt="team-image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/other/LOS_GRISES_1.webp?raw=true" />
 </div>
 
 The code of our robot is designed using a modular architecture, meaning it is divided into multiple independent modules, each responsible for a specific function within the system. This approach not only improves code organization but also facilitates maintenance, scalability, and understanding. Thanks to this structure, each module can be developed, tested, and optimized individually, reducing the possibility of errors and allowing improvements without affecting the overall system. At the same time, all modules are interconnected, enabling the robot to function as a unified system capable of interacting with its environment in real time.
