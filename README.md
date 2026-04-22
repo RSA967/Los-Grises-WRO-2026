@@ -30,7 +30,8 @@ Finally, this system is designed with future development in mind. Its modular st
 In conclusion, the developed code provides a solid foundation for the robot’s operation. It enables environmental perception, data processing, and preparation for autonomous decision-making. Thanks to its modular design, integration with sensors, and focus on continuous improvement, the robot has the potential to developincreasingly complex behaviors, which are essential for success in competitions such as WRO and in the field of robotics in general.
 
 ## TEAM PHOTO
-<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="
+<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/WhatsApp%20Image%202026-04-21%20at%208.13.32%20PM.jpeg?raw=true" /></div>
+
 
 TEAM MEMBERS
 ---------
