@@ -1,0 +1,23 @@
+**binnacle**
+
+January 24 – Project Start
+On this day, we began brainstorming the idea for the robot. We considered what we wanted it to do and suggested that it could see objects using a camera. We could also use the HuskyLens camera to recognize colors.
+
+January 25–31 – Robot Design
+During these days, we designed the robot. We planned the structure and where the components would go. We also tested different parts to see which configuration was the most stable.
+
+February (entire month) – Construction
+This month, we focused on assembling the robot. We built the chassis, attached the wheels and motors, and ensured it was well-balanced so it wouldn't tip over.
+We gradually improved the structure to make it more robust.
+
+March (until the 30th) – Electronics and Camera
+During this period, we installed the electronic components. We connected the controller and battery and organized the cables.
+We also attached the HuskyLens camera and adjusted it so it could see objects clearly. We ran tests to ensure it would work correctly.
+
+April 6–11 – Programming
+During these days, we began programming the robot. We used code to enable the camera to detect colors and provide information such as the position (X, Y) and size of objects.
+We tested the code several times and corrected any errors.
+
+April 21–24 – Final Testing
+During these last few days, we conducted final tests of the robot. We checked that everything would work properly and made some adjustments.
+We also verified that the camera correctly detected objects and that the robot was ready for the competition.
