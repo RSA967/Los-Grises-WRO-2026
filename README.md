@@ -39,6 +39,11 @@ Coach:Eduardo Alvarado Gonzalez
 
 Age:40
 
+<div align="center">
+<img width="200" height="200" alt="Eduardo Gonzalez" src="" />
+</div>
+
+
 Role: Coach and founder.
 
 "An engineer and professor founded the Los Grises Superiores in 2014, since then with outstanding national and international participations."
