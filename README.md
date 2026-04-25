@@ -102,4 +102,4 @@ When I was little, I didn't even know robotics existed, until I started high sch
 
 |COMPONENT| DESCRIPTION | IMAGE | PURCHASE LINK|
 |---------|-------------|-------|--------------|
-|HuskyLens DFRobot|Is an AI-powered machine vision sensor designed to detect faces, objects, lines, colors, and tags without complex algorithms.| <div align="center"><img width="500" height="250" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/models/HuskyCam.jpeg?raw=true" /></div> |[Buy here](/div>https://a.co/d/0gZv6Qfk)|
+|HuskyLens DFRobot|Is an AI-powered machine vision sensor designed to detect faces, objects, lines, colors, and tags without complex algorithms.| <div align="center"><img width="500" height="250" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/models/HuskyCam.jpeg?raw=true" /></div> |[Buy here](https://www.amazon.com.mx/dp/B089GLJHZD?_encoding=UTF8&ref=cm_sw_r_cp_ud_dp_MDRGXPSKY7FN4SKNB6NJ&ref_=cm_sw_r_cp_ud_dp_MDRGXPSKY7FN4SKNB6NJ&social_share=cm_sw_r_cp_ud_dp_MDRGXPSKY7FN4SKNB6NJ&th=1)|
