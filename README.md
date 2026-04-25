@@ -40,7 +40,7 @@ Coach:Eduardo Alvarado Gonzalez
 Age:40
 
 <div align="center">
-<img width="200" height="200" alt="Eduardo Gonzalez" src="" />
+<img width="200" height="200" alt="Eduardo Gonzalez" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/Eduardo%20Alvarado%20Gonz%C3%A1les.png?raw=true" />
 </div>
 
 
