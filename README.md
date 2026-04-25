@@ -52,7 +52,7 @@ Age: 14 years old
 
 Role: Programmer
 
-My robotics story is that I started programming and building robots when I was very little. I always wanted to build more and I never got tired of it. I can tell you that I started when I was 9 years old, and I had the opportunity to compete in the WRO Future Engineers competition, and I didn't want to miss it.
+My journey in robotics began when I was very young; I started programming and building robots, and I always wanted to build more—I never got tired of it. I can tell you that I started when I was 9 years old, and when the opportunity arose to compete in the “Future Engineers” robotics competition, I didn’t want to miss out on it.
 
 
 Name: Carlos Samuel Cortes Esteban
@@ -63,9 +63,9 @@ Age: 14
                   
 Role: Builder
 
--Carlos Samuel Cortes Esteban
+-Carlos Samuel Cortés Esteban
 
-Ever since I was little, robotics has always fascinated me, but it wasn't until I started high school that I could really begin. I enrolled in PCA (Advanced Curriculum Program), and that's where I've been learning to program and build things. I also took some courses at Tec de Monterrey, and last summer I took the opportunity to continue learning at the Normal Superior (Teacher Training College). Little by little, what began as a childhood curiosity has become something I'm preparing myself for seriously.
+Ever since I was a kid, robotics has always fascinated me, but it wasn’t until I started high school that I was able to really get into it. I joined the Advanced Curriculum Program (PCA), and that’s where I’ve been learning to code and build things. I also took some courses at Tec, and last summer I took the opportunity to continue learning at the Normal Superior. Little by little, what started as a childhood curiosity has turned into something I’m putting a lot of effort into.
 
 
 Name: Dante Campos Villarreal
@@ -76,7 +76,7 @@ Age: 14
 
 Role: Electronics Technician
 
-Since I was little, I didn't know robotics existed until I entered a program called PCA in high school. There, I met the robotics and computer science teacher, and from that moment on, I began to learn more and more.
+When I was little, I didn't even know robotics existed, until I started high school and joined a program called PCA, where I met the robotics and computer science teacher, and from that moment on, I began to learn more and more.
 
 ## Vehicle Photos
 
