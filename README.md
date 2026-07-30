@@ -53,7 +53,7 @@ Name: Rodolfo Iván Sánchez Andaverde
 
 Age: 14 years old
 
-<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/Rodolfo.jpg?raw=true" /></div>
+<div align="center"><img width="200" height="200" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/Rodolfo.jpg?raw=true" /></div>
 
 Role: Programmer
 
@@ -64,7 +64,7 @@ Name: Carlos Samuel Cortes Esteban
 
 Age: 14
 
-<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/carlos.jpg?raw=true" /></div>
+<div align="center"><img width="200" height="200" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/carlos.jpg?raw=true" /></div>
                   
 Role: Builder
 
@@ -73,31 +73,21 @@ Role: Builder
 Ever since I was a kid, robotics has always fascinated me, but it wasn’t until I started high school that I was able to really get into it. I joined the Advanced Curriculum Program (PCA), and that’s where I’ve been learning to code and build things. I also took some courses at Tec, and last summer I took the opportunity to continue learning at the Normal Superior. Little by little, what started as a childhood curiosity has turned into something I’m putting a lot of effort into.
 
 
-Name: Dante Campos Villarreal
-
-Age: 14
-
-<div align="center"><img width="600" height="500" alt="OpenMV Cam H7 Plus" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/t-photos/Dante.jpg?raw=true" /></div>
-
-Role: Electronics Technician
-
-When I was little, I didn't even know robotics existed, until I started high school and joined a program called PCA, where I met the robotics and computer science teacher, and from that moment on, I began to learn more and more.
-
 ## Vehicle Photos
 
 <div align="center">
 
 | Front | Back |
 |:--:|:--:|
-<img width="500" height="500" alt="image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Front.jpeg?raw=true" /> | <img width="500" height="500" alt="image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Back.jpeg?raw=true" /> |
+<img width="500" height="500" alt="image" src="" /> | <img width="500" height="500" alt="image" src="" /> |
 
 | Bottom | Top |
 |:--:|:--:|
-| <img width="500" height="500" alt="Top" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Below.jpeg?raw=true" /> | <img width="500" height="500" alt="Bottom" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Top.jpeg?raw=true" /> |
+| <img width="500" height="500" alt="Top" src="" /> | <img width="500" height="500" alt="Bottom" src="" /> |
 
 | Left | Right |
 |:--:|:--:|
-| <img width="500" height="500" alt="Left" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Left.jpeg?raw=true" /> | <img width="500" height="500" alt="Right" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Right.jpeg?raw=true" /> |
+| <img width="500" height="500" alt="Left" src="" /> | <img width="500" height="500" alt="Right" src="" /> |
 
 
 |COMPONENT| DESCRIPTION | IMAGE | PURCHASE LINK|
