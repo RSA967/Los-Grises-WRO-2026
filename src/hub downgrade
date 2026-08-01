@@ -1,0 +1,27 @@
+Technical Summary: Procedure for Firmware Modification in the LEGO Technic Large Hub
+1. Justification for Using Pybricks Code
+The Pybricks Code development environment is a specialized tool used to manage the software compatibility of the device. Utilizing this environment to downgrade or restore the firmware of the LEGO Technic Large Hub is necessary for the following reasons:
+
+Firmware version management: It grants access to recovery options to install older or stable versions of the device's operating system in case of compatibility issues.
+
+Low-level direct interaction: It facilitates communication with the hardware when it enters critical data transfer mode (DFU Mode).
+
+2. Necessity of the Zadig Utility (zadig.akeo.ie)
+The zadig.akeo.ie platform provides the Windows utility required for USB driver management. Its use is essential due to the following factors:
+
+Native driver incompatibility: When the hub enters DFU mode, the Windows operating system lacks the appropriate communication drivers by default, resulting in a recognition failure.
+
+WinUSB protocol implementation: Zadig allows for the rapid installation and replacement of the generic WinUSB driver, establishing the necessary communication bridge between the PC and the Pybricks environment to execute data transfers.
+
+3. General Execution Procedure
+DFU Mode Connection: Connect the LEGO Technic Large Hub to the computer, ensuring it is in firmware update mode (DFU Mode).
+
+Driver Configuration with Zadig:
+
+Download and run the application from the specified official website.
+
+Select the corresponding device in the interface and choose WinUSB as the target driver.
+
+Apply the modification by clicking Replace Driver.
+
+Restoration in Pybricks Code: Access the Pybricks Code platform again to proceed with loading or restoring the desired firmware version on the device.
