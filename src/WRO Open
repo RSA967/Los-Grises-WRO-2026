@@ -1,0 +1,440 @@
+import hub
+import utime
+from hub import port, button
+
+
+# =============================================================================
+#1. PUERTOS
+# =============================================================================
+PUERTO_IZQ    = "C"    # sensor de distancia izquierdo
+PUERTO_DER    = "D"    # sensor de distancia derecho
+PUERTO_VOLANTE= "E"    # motor de direccion
+PUERTO_TRACCION = "F"    # motor de traccion
+PUERTO_FRONTAL= None    # opcional: "A" o "B". Arath lo lee pero en el
+                        # programa OPEN no lo usa, por eso va apagado.
+PUERTO_FRONTAL_KP = "B" # nuevo sensor de distancia frontal LEGO para Kp.
+                        # Conectalo al puerto B del hub; no usa I2C
+                        # ni requiere direccion en este programa.
+
+
+# =============================================================================
+#2. CALIBRACION(ajusta SOLO aqui)
+# =============================================================================
+# --- velocidades ---
+VELOCIDAD        = 50   # : velocidad = 60
+VELOCIDAD_FRENTE= 30    # velocidad si el sensor frontal ve pared cerca
+VEL_VOLANTE    = 100    # velocidad del motor de direccion
+
+# --- direccion ---
+# --- Kp variable segun el sensor frontal (sin cambiar Ki ni Kd) ---
+KP_NORMAL        = 2 # Kp original: grados de volante por cm de error
+KP_CERCA        = 4 # Kp reforzado cuando hay una pared cerca
+DIST_KP_ENTRAR    = 60.0# cm: activar Kp reforzado a esta distancia o menos
+DIST_KP_SALIR    = 70.0# cm: volver a Kp normal por encima de este valor
+LECTURAS_KP    = 2    # lecturas consecutivas para confirmar el cambio
+LIMITE_VOLANTE    = 30    # tope mecanico del volante, en grados. MIDELO.
+TRIM_VOLANTE    = 0    # corrige el centro si el robot se va de lado
+ZONA_MUERTA    = 1.0    # cm de diferencia que se ignoran
+INVERTIR_VOLANTE= False# True si gira al reves
+INVERTIR_TRACCION = False# True si avanza en reversa
+
+# --- conteo de esquinas / vueltas ---
+EJE_GIRO        = "yaw"# "yaw" | "pitch" | "roll".
+                        # yaw solo sirve si el hub va HORIZONTAL. Si lo
+                        # montaste de canto o vertical, el giro del robot
+                        # aparece en pitch o en roll. Averigua cual con
+                        # MODO_PRUEBA: gira el robot 90 grados a mano y mira
+                        # que eje se mueve ~90.
+ESCALA_ANGULO    = 1.0    # ponlo en 10.0 si el firmware devuelve decimas de
+                        # grado (un giro de 90 se ve como 900 en la prueba)
+GRADOS_POR_ESQUINA = 90    # grados de giro que cuentan como una esquina.
+                        # Bajalo (p.ej. 80) si el robot recorta las curvas:
+                        # mira la columna 'giro' al terminar UNA vuelta.
+                        # Debe marcar ~360. Si marca 330, cada esquina son
+                        # 82 grados reales y con 90 nunca llega a 12.
+ESQUINAS_META    = 12    # Arath: 12 esquinas = 3 vueltas (1080 grados)
+MS_EXTRA_FINAL    = 2000    # Arath: avanza 200 ms mas y se detiene
+TIEMPO_MAX_S    = 180    # red de seguridad: para pase lo que pase a los
+                        # 3 minutos (limite de WRO). 0 = desactivado.
+
+# --- sensores ---
+DIST_MAX        = 200.0# cm que se asumen cuando el sensor no ve nada
+DIST_UTIL        = 60.0# cm; recorta las lecturas ANTES de restarlas.
+                        # Sin esto, en una esquina un sensor se queda sin
+                        # pared, devuelve DIST_MAX y el error se dispara
+                        # (200-30=170) clavando el volante en el tope.
+UNIDAD_SENSOR    = "auto" # "auto" | "cm" | "mm"
+DIST_FRONTAL_MIN= 25.0# cm; solo aplica si PUERTO_FRONTAL no es None
+
+# --- bucle ---
+PERIODO_MS        = 20    # periodo del ciclo de control
+PASO_MINIMO    = 1    # grados; no reenvia la orden si el cambio es menor
+ESPERAR_BOTON    = True# espera el boton IZQUIERDO para arrancar
+DEBUG            = True# telemetria, como el bloque serial de Arath
+MODO_PRUEBA    = False# True = banco de pruebas con el robot EN EL AIRE.
+                        # No mueve la traccion: solo lee sensores y volante.
+                        # Usalo para ajustar INVERTIR_VOLANTE y TRIM_VOLANTE.
+
+
+# =============================================================================
+#3. ACCESO AL HARDWARE
+# =============================================================================
+utime.sleep_ms(500)        # deja que el hub detecte los dispositivos
+
+
+def _puerto(nombre):
+    return getattr(port, nombre)
+
+
+MOTOR_VOLANTE= _puerto(PUERTO_VOLANTE).motor
+MOTOR_TRACCION = _puerto(PUERTO_TRACCION).motor
+
+
+def limitar(valor, minimo, maximo):
+    if valor < minimo:
+        return minimo
+    if valor > maximo:
+        return maximo
+    return valor
+
+
+def leer_distancia(nombre_puerto):
+    """Devuelve cm. Si el sensor no ve nada o no esta conectado -> DIST_MAX."""
+    if nombre_puerto is None:
+        return DIST_MAX
+    try:
+        dispositivo = _puerto(nombre_puerto).device
+        if dispositivo is None:
+            return DIST_MAX
+        lectura = dispositivo.get()
+    except Exception:
+        return DIST_MAX
+
+    if not lectura:
+        return DIST_MAX
+    d = lectura[0]
+    if d is None or d < 0:
+        return DIST_MAX
+
+    if UNIDAD_SENSOR == "mm":
+        d = d / 10.0
+    elif UNIDAD_SENSOR == "auto" and d > 250:
+        d = d / 10.0        # el sensor respondio en milimetros
+
+    return limitar(float(d), 0.0, DIST_MAX)
+
+
+# --- sensor frontal dedicado al Kp -----------------------------------------
+_kp_cerca_activo = False
+_lecturas_cerca_kp = 0
+_lecturas_lejos_kp = 0
+
+def actualizar_kp_frontal():
+    """Lee el sensor en cada ciclo y selecciona Kp con histeresis.
+
+    Una lectura invalida, cero o fuera de rango devuelve Kp normal.
+    El puerto frontal opcional de velocidad/volante queda independiente.
+    """
+    global _kp_cerca_activo, _lecturas_cerca_kp, _lecturas_lejos_kp
+    try:
+        distancia = leer_distancia(PUERTO_FRONTAL_KP)
+        valida = 0.0 < distancia < DIST_MAX and distancia == distancia
+    except Exception:
+        valida = False
+
+    if not valida:
+        _kp_cerca_activo = False
+        _lecturas_cerca_kp = 0
+        _lecturas_lejos_kp = 0
+    elif distancia <= DIST_KP_ENTRAR:
+        _lecturas_cerca_kp += 1
+        _lecturas_lejos_kp = 0
+        if _lecturas_cerca_kp >= LECTURAS_KP:
+            _kp_cerca_activo = True
+    elif distancia > DIST_KP_SALIR:
+        _lecturas_lejos_kp += 1
+        _lecturas_cerca_kp = 0
+        if _lecturas_lejos_kp >= LECTURAS_KP:
+            _kp_cerca_activo = False
+    else:
+        # Entre 60 y 65 cm se conserva el estado anterior.
+        _lecturas_cerca_kp = 0
+        _lecturas_lejos_kp = 0
+
+    return KP_CERCA if _kp_cerca_activo else KP_NORMAL
+
+
+# --- giroscopio: reemplaza al MPU6050 ---------------------------------------
+_INDICE_EJE = {"yaw": 0, "pitch": 1, "roll": 2}
+
+_ang_previo = 0.0
+_giro_total = 0.0
+
+
+def leer_ejes():
+    """Devuelve (yaw, pitch, roll) tal cual los da la IMU del hub."""
+    try:
+        return hub.motion.yaw_pitch_roll()
+    except AttributeError:
+        return hub.motion.position()
+
+
+def _leer_angulo():
+    """Angulo del eje elegido en EJE_GIRO, en grados."""
+    return leer_ejes()[_INDICE_EJE.get(EJE_GIRO, 0)] / ESCALA_ANGULO
+
+
+def reiniciar_giro():
+    """Equivale a reiniciarAngulos() del MPU6050 de Arath."""
+    global _ang_previo, _giro_total
+    _ang_previo = _leer_angulo()
+    _giro_total = 0.0
+
+
+def actualizar_giro():
+    """Acumula la rotacion REAL del robot y la devuelve en grados.
+
+    Suma el cambio de angulo de cada ciclo desenrollando el salto de +180 a
+    -180. Es mas fiable que preguntar si |angulo| paso de 87: aunque el ciclo
+    no muestree justo en el instante del giro, la suma no se pierde. Es la
+    misma idea del bloque `si 90g > 1080` del programa de bloques.
+    """
+    global _ang_previo, _giro_total
+    a = _leer_angulo()
+    d = a - _ang_previo
+    while d > 180:
+        d -= 360
+    while d < -180:
+        d += 360
+    _ang_previo = a
+    _giro_total += d
+    return _giro_total
+
+
+# --- actuadores -------------------------------------------------------------
+_ultimo_volante = None
+
+
+def volante(grados):
+    """Equivale al bloque volante (servo del pin 8) de Arath."""
+    global _ultimo_volante
+    if INVERTIR_VOLANTE:
+        grados = -grados
+    objetivo = int(limitar(grados, -LIMITE_VOLANTE, LIMITE_VOLANTE))
+    if _ultimo_volante is not None and abs(objetivo - _ultimo_volante) < PASO_MINIMO:
+        return
+    _ultimo_volante = objetivo
+    MOTOR_VOLANTE.run_to_position(objetivo, VEL_VOLANTE)
+
+
+def traccion(velocidad):
+    """Equivale al bloque motor (pines 9/10/11) de Arath."""
+    if INVERTIR_TRACCION:
+        velocidad = -velocidad
+    v = int(limitar(velocidad, -100, 100))
+    try:
+        MOTOR_TRACCION.run_at_speed(v)
+    except Exception:
+        MOTOR_TRACCION.pwm(v)
+
+
+def parar():
+    try:
+        MOTOR_TRACCION.brake()
+    except Exception:
+        MOTOR_TRACCION.pwm(0)
+    MOTOR_VOLANTE.run_to_position(0, VEL_VOLANTE)
+
+
+def mostrar(texto):
+    try:
+        hub.display.show(str(texto))
+    except Exception:
+        pass
+
+
+def pitar(frecuencia=700, ms=150):
+    try:
+        hub.sound.beep(frecuencia, ms, 100)
+    except Exception:
+        pass
+
+
+# =============================================================================
+#4. CONTROL DE PARED(bloque leer_sensores de Arath)
+# =============================================================================
+def calcular_error():
+    """Devuelve (grados_de_volante, izq, der, frontal).
+
+    error positivo = hay mas espacio a la DERECHA, el robot se corrige hacia
+    ese lado; es el mismo signo que el (izq - der) * -1 de Arath.
+    """
+    izq = leer_distancia(PUERTO_IZQ)
+    der = leer_distancia(PUERTO_DER)
+    frontal = leer_distancia(PUERTO_FRONTAL) if PUERTO_FRONTAL else DIST_MAX
+
+    # Recorta a DIST_UTIL antes de restar: un sensor sin pared enfrente
+    # devuelve DIST_MAX y sin este tope el volante se va al maximo.
+    error = min(der, DIST_UTIL) - min(izq, DIST_UTIL)
+    if abs(error) < ZONA_MUERTA:
+        error = 0.0
+
+    # El sensor frontal solo cambia la ganancia de esta correccion.
+    kp_actual = actualizar_kp_frontal()
+    grados = error * kp_actual + TRIM_VOLANTE
+    return limitar(grados, -LIMITE_VOLANTE, LIMITE_VOLANTE), izq, der, frontal
+
+
+def prueba():
+    """Banco de pruebas con el robot EN EL AIRE (la traccion no se mueve).
+
+    1. SIGNO. Acerca la mano al sensor IZQUIERDO (puerto C, a unos 10 cm).
+    Las ruedas deben girar a la DERECHA, es decir ALEJARSE de tu mano.
+    Si giran HACIA tu mano, pon INVERTIR_VOLANTE = True.
+    Ese mismo cambio arregla tambien el caso de tener C y D intercambiados:
+    cambiar los sensores de lado equivale a cambiar el signo del error.
+
+    2. CENTRO. Sin manos cerca, con C y D leyendo parecido, las ruedas deben
+    quedar RECTAS. Si quedan torcidas, suma o resta grados en TRIM_VOLANTE
+    hasta enderezarlas (negativo corrige una desviacion a la derecha).
+
+    3. EJE DE GIRO. Gira el robot 90 grados sobre la mesa, como si tomara una
+    esquina, y mira cual de los tres numeros (yaw/pit/rol) cambio ~90.
+    Ese es el que va en EJE_GIRO. Si cambio ~900 en vez de ~90, pon
+    ESCALA_ANGULO = 10.0. La columna 'giro' debe acercarse a 90 tras la
+    vuelta completa de 90 grados.
+
+    Boton DERECHO para salir.
+    """
+    print("MODO PRUEBA - robot EN EL AIRE, la traccion no se mueve")
+    print("1) mano al sensor C: las ruedas deben girar a la DERECHA")
+    print("2) gira el robot 90 grados: mira que eje cambia ~90")
+    reiniciar_giro()
+    while not button.right.is_pressed():
+        grados, izq, der, frontal = calcular_error()
+        volante(grados)
+        if grados > 1:
+            lado = "-> DERECHA"
+        elif grados < -1:
+            lado = "<- IZQUIERDA"
+        else:
+            lado = "|| recto"
+        ejes = leer_ejes()
+        print("C(izq)", round(izq, 1), " D(der)", round(der, 1),
+            " volante", round(grados, 1), lado,
+            "| yaw", round(ejes[0], 1), " pit", round(ejes[1], 1),
+            " rol", round(ejes[2], 1),
+            "| giro", round(actualizar_giro(), 1))
+        utime.sleep_ms(250)
+    parar()
+    print("Fin del modo prueba")
+
+
+# =============================================================================
+#5. PROGRAMA PRINCIPAL
+# =============================================================================
+def main():
+    print("WRO OPEN - SPIKE|C=izq D=der E=volante F=traccion")
+
+    # --- preparacion (bloque inicio de Arath) ---
+    # OJO con el orden: el cero del volante es la posicion en la que estan las
+    # ruedas AL ARRANCAR el programa. Por eso el preset va ANTES de mover nada;
+    # si se mueve primero, el robot toma como "recto" una posicion torcida.
+    # Colocalo con las ruedas rectas antes de dar play.
+    MOTOR_VOLANTE.preset(0)
+    MOTOR_VOLANTE.run_to_position(0, VEL_VOLANTE)
+    utime.sleep_ms(300)
+    traccion(0)
+
+    if MODO_PRUEBA:
+        prueba()
+        return
+
+    if ESPERAR_BOTON:
+        mostrar("-")
+        print("Listo. Pulsa el boton IZQUIERDO para arrancar.")
+        while not button.left.is_pressed():
+            utime.sleep_ms(50)
+        while button.left.is_pressed():
+            utime.sleep_ms(50)
+
+    reiniciar_giro()            # calibra el cero del giro
+    esquinas = 0
+    velocidad = VELOCIDAD
+    mostrar(0)
+    pitar(900, 120)
+
+    t_debug = utime.ticks_ms()
+    t_inicio = utime.ticks_ms()
+
+    while True:
+        # --- boton derecho = paro de emergencia ---
+        if button.right.is_pressed():
+            print("PARO manual")
+            break
+
+        # --- red de seguridad por tiempo ---
+        if TIEMPO_MAX_S and utime.ticks_ms() - t_inicio > TIEMPO_MAX_S * 1000:
+            print("TIEMPO AGOTADO tras", TIEMPO_MAX_S, "s. Esquinas contadas:",
+                esquinas, "- revisa GRADOS_POR_ESQUINA")
+            break
+
+        # --- control de pared ---
+        grados, izq, der, frontal = calcular_error()
+        volante(grados)
+
+        # --- sensor frontal opcional ---
+        v = velocidad
+        if PUERTO_FRONTAL and frontal < DIST_FRONTAL_MIN:
+            v = VELOCIDAD_FRENTE
+            volante(LIMITE_VOLANTE if der > izq else -LIMITE_VOLANTE)
+
+        traccion(v)
+
+        # --- conteo de esquinas por giroscopio ---
+        total = actualizar_giro()
+        cuenta = int(abs(total) / GRADOS_POR_ESQUINA)
+        if cuenta != esquinas:
+            esquinas = cuenta
+            mostrar(esquinas // 4)        # vuelta actual: 0, 1, 2, 3
+            pitar(1200, 80)                # un pitido en CADA esquina
+            print("esquina", esquinas, " vuelta", esquinas // 4,
+                " giro total", round(total, 1))
+
+        # --- fin de carrera: 12 esquinas = 3 vueltas ---
+        if esquinas >= ESQUINAS_META:
+            print("12 esquinas -> 200 ms extra y freno")
+            t_fin = utime.ticks_ms() + MS_EXTRA_FINAL
+            while utime.ticks_ms() < t_fin:
+                grados, izq, der, frontal = calcular_error()
+                volante(grados)
+                traccion(velocidad)
+                utime.sleep_ms(PERIODO_MS)
+            break
+
+        # --- telemetria (bloque serial de Arath) ---
+        if DEBUG and utime.ticks_ms() - t_debug > 300:
+            t_debug = utime.ticks_ms()
+            print("izq", round(izq, 1), " der", round(der, 1),
+                " err", round(grados, 1), " giro", round(total, 1),
+                " esq", esquinas)
+
+        utime.sleep_ms(PERIODO_MS)
+
+    parar()
+    mostrar("F")
+    pitar(500, 300)
+    # El giro total es el numero con el que se calibra GRADOS_POR_ESQUINA:
+    # dividelo entre las esquinas que diste de verdad.
+    print("Fin. Esquinas:", esquinas, " giro total:", round(_giro_total, 1),
+        "grados (esperado", ESQUINAS_META * GRADOS_POR_ESQUINA, ")")
+
+
+try:
+    main()
+finally:
+    # pase lo que pase, el robot no se queda andando
+    try:
+        parar()
+    except Exception:
+        pass
