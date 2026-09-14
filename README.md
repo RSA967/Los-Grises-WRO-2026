@@ -102,7 +102,7 @@ Ever since I was a kid, robotics has always fascinated me, but it wasn’t until
 <div align="center">
 
 ### 🧩 Driving Demonstration
-[![Watch the video](https://img.shields.io/badge/▶️%20Watch%20on-YouTube-red?logo=youtube&style=for-the-badge)](https://www.youtube.com/watch?v=GGWfIJxq4uQ)
+[![Watch the video](https://img.shields.io/badge/▶️%20Watch%20on-YouTube-red?logo=youtube&style=for-the-badge)](https://youtu.be/VIE-A2rygj0?si=SPRAHSDuaCo-13ox)
 
 </div>
 
