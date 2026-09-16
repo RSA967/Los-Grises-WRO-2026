@@ -109,4 +109,4 @@ Ever since I was a kid, robotics has always fascinated me, but it wasn’t until
 > This video shows the vehicle operating autonomously as part of the WRO 2026 Future Engineers documentation.
 
 ### 🚧 Obstacle Challenge  
-[![Watch the video](https://img.shields.io/badge/▶️%20Watch%20on-YouTube-red?logo=youtube&style=for-the-badge)]()
+[![Watch the video](https://img.shields.io/badge/▶️%20Watch%20on-YouTube-red?logo=youtube&style=for-the-badge)](https://youtu.be/-1kIr0VEhA8?feature=shared)
