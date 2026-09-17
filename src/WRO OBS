@@ -1,0 +1,476 @@
+# -*- coding: utf-8 -*-
+# =============================================================================
+# WRO 2026 - OBSTACULOS + ESTACIONAMIENTO - LEGO SPIKE Prime
+# Modificado para detenerse a las 12 vueltas de 90 grados.
+# =============================================================================
+
+import hub
+import utime
+from hub import port, button
+from projects.pyhuskylens import HuskyLens, ALGORITHM_COLOR_RECOGNITION
+
+
+# =============================================================================
+# 1. PUERTOS
+# =============================================================================
+PUERTO_CAMARA= "A"    # HuskyLens
+PUERTO_IZQ    = "C"    # sensor de distancia izquierdo
+PUERTO_DER    = "D"    # sensor de distancia derecho
+PUERTO_VOLANTE= "E"    # motor de direccion
+PUERTO_TRACCION = "F"    # motor de traccion
+PUERTO_FRONTAL= "B"    # Sensor frontal activado en el puerto B
+
+
+# =============================================================================
+# 2. CALIBRACION
+# =============================================================================
+VELOCIDAD        = 40
+VELOCIDAD_BUSQUEDA = 20
+VELOCIDAD_FRENTE= 30
+VEL_VOLANTE        = 100
+
+KP_VOLANTE        = 6
+KP_FRONTAL_CERCA= 9
+DIST_KP_FRONTAL    = 146.0
+
+LIMITE_VOLANTE    = 30
+TRIM_VOLANTE    = 0
+ZONA_MUERTA        = 1.0
+INVERTIR_VOLANTE= False
+INVERTIR_TRACCION= False
+
+ID_VERDE        = 2
+ID_ROJO            = 1
+ID_PARK            = 3
+CENTRO_IMAGE    = 160
+X_OBJETIVO_VERDE= 150
+X_OBJETIVO_ROJO    = -150
+KP_CAM            = 1
+LIMITE_CAM        = 20
+PERIODO_CAM_MS    = 50
+
+# --- Memoria para el color rojo ---
+TIEMPO_MEMORIA_ROJO_MS = 500
+
+EJE_GIRO        = "yaw"
+ESCALA_ANGULO    = 1.0
+GRADOS_POR_ESQUINA = 90
+ESQUINAS_OBSTACULOS= 12
+ESQUINAS_FINAL    = 12    # <--- MODIFICADO: Se detiene al llegar a 12 vueltas
+TIEMPO_MAX_S    = 180
+
+PARK_LADO        = 1
+ANCHO_MIN_PARK    = 12
+PARK_VELOCIDAD    = 25
+PARK_VOLANTE_1    = 25
+PARK_ANG_1        = 30
+PARK_MS_1        = 950
+PARK_VOLANTE_2    = -25
+PARK_ANG_2        = 5
+PARK_MS_2        = 1100
+PARK_FRONTAL_MIN= 20
+PARK_AVANCE_VEL    = 18
+PARK_AVANCE_MS    = 200
+
+DIST_MAX        = 250.0
+DIST_UTIL        = 80.0
+UNIDAD_SENSOR    = "auto"
+DIST_FRONTAL_MIN= 40.0
+
+PERIODO_MS        = 20
+PASO_MINIMO        = 1
+ESPERAR_BOTON    = True
+DEBUG            = True
+MODO_PRUEBA        = False
+
+
+# =============================================================================
+# 3. ACCESO AL HARDWARE
+# =============================================================================
+utime.sleep_ms(500)
+
+
+def _puerto(nombre):
+    return getattr(port, nombre)
+
+
+MOTOR_VOLANTE= _puerto(PUERTO_VOLANTE).motor
+MOTOR_TRACCION = _puerto(PUERTO_TRACCION).motor
+
+CAMARA = HuskyLens(PUERTO_CAMARA, baud=9600, debug=False)
+CAMARA.set_alg(ALGORITHM_COLOR_RECOGNITION)
+
+
+def limitar(valor, minimo, maximo):
+    if valor < minimo:
+        return minimo
+    if valor > maximo:
+        return maximo
+    return valor
+
+
+def leer_distancia(nombre_puerto):
+    if nombre_puerto is None:
+        return DIST_MAX
+    try:
+        dispositivo = _puerto(nombre_puerto).device
+        if dispositivo is None:
+            return DIST_MAX
+        lectura = dispositivo.get()
+    except Exception:
+        return DIST_MAX
+
+    if not lectura:
+        return DIST_MAX
+    d = lectura[0]
+    if d is None or d < 0:
+        return DIST_MAX
+
+    if UNIDAD_SENSOR == "mm":
+        d = d / 10.0
+    elif UNIDAD_SENSOR == "auto" and d > 250:
+        d = d / 10.0
+
+    return limitar(float(d), 0.0, DIST_MAX)
+
+
+# --- giroscopio ---
+_INDICE_EJE = {"yaw": 0, "pitch": 1, "roll": 2}
+_ang_previo = 0.0
+_giro_total = 0.0
+
+
+def leer_ejes():
+    try:
+        return hub.motion.yaw_pitch_roll()
+    except AttributeError:
+        return hub.motion.position()
+
+
+def _leer_angulo():
+    return leer_ejes()[_INDICE_EJE.get(EJE_GIRO, 0)] / ESCALA_ANGULO
+
+
+def reiniciar_giro():
+    global _ang_previo, _giro_total
+    _ang_previo = _leer_angulo()
+    _giro_total = 0.0
+
+
+def actualizar_giro():
+    global _ang_previo, _giro_total
+    a = _leer_angulo()
+    d = a - _ang_previo
+    while d > 180:
+        d -= 360
+    while d < -180:
+        d += 360
+    _ang_previo = a
+    _giro_total += d
+    return _giro_total
+
+
+# --- actuadores ---
+_ultimo_volante = None
+_ultimo_display = None
+
+
+def volante(grados):
+    global _ultimo_volante
+    if INVERTIR_VOLANTE:
+        grados = -grados
+    objetivo = int(limitar(grados, -LIMITE_VOLANTE, LIMITE_VOLANTE))
+    if _ultimo_volante is not None and abs(objetivo - _ultimo_volante) < PASO_MINIMO:
+        return
+    _ultimo_volante = objetivo
+    MOTOR_VOLANTE.run_to_position(objetivo, VEL_VOLANTE)
+
+
+def traccion(velocidad):
+    if INVERTIR_TRACCION:
+        velocidad = -velocidad
+    v = int(limitar(velocidad, -100, 100))
+    try:
+        MOTOR_TRACCION.run_at_speed(v)
+    except Exception:
+        MOTOR_TRACCION.pwm(v)
+
+
+def parar():
+    try:
+        MOTOR_TRACCION.brake()
+    except Exception:
+        MOTOR_TRACCION.pwm(0)
+    MOTOR_VOLANTE.run_to_position(0, VEL_VOLANTE)
+
+
+def mostrar(texto):
+    global _ultimo_display
+    t = str(texto)
+    if t == _ultimo_display:
+        return
+    _ultimo_display = t
+    try:
+        hub.display.show(t)
+    except Exception:
+        pass
+
+
+def pitar(frecuencia=700, ms=150):
+    try:
+        hub.sound.beep(frecuencia, ms, 100)
+    except Exception:
+        pass
+
+
+# =============================================================================
+# 4. CONTROL DE PARED
+# =============================================================================
+def calcular_error():
+    izq = leer_distancia(PUERTO_IZQ)
+    der = leer_distancia(PUERTO_DER)
+    frontal = leer_distancia(PUERTO_FRONTAL) if PUERTO_FRONTAL else DIST_MAX
+
+    kp_actual = KP_VOLANTE
+    if frontal <= DIST_KP_FRONTAL:
+        kp_actual = KP_FRONTAL_CERCA
+
+    error = min(der, DIST_UTIL) - min(izq, DIST_UTIL)
+    if abs(error) < ZONA_MUERTA:
+        error = 0.0
+
+    grados = error * kp_actual + TRIM_VOLANTE
+    return limitar(grados, -LIMITE_VOLANTE, LIMITE_VOLANTE), izq, der, frontal
+
+
+# =============================================================================
+# 5. CAMARA
+# =============================================================================
+_cam_cache = (0, 0, 0, 0)
+_cam_t = -100000
+
+
+def _campo(obj, nombres, por_defecto=0):
+    for n in nombres:
+        v = getattr(obj, n, None)
+        if v is not None:
+            return v
+    return por_defecto
+
+
+def leer_camara():
+    global _cam_cache, _cam_t
+    if utime.ticks_ms() - _cam_t < PERIODO_CAM_MS:
+        return _cam_cache
+    _cam_t = utime.ticks_ms()
+
+    try:
+        bloques = CAMARA.get_blocks()
+    except Exception as e:
+        print("camara sin respuesta:", e)
+        _cam_cache = (0, 0, 0, 0)
+        return _cam_cache
+
+    mejor_id, mejor_x, mejor_ancho, ancho_park = 0, 0, 0, 0
+    for b in bloques:
+        bid = _campo(b, ("ID", "id"))
+        ancho = _campo(b, ("width", "w"))
+        if bid == ID_PARK:
+            if ancho > ancho_park:
+                ancho_park = ancho
+        elif bid in (ID_VERDE, ID_ROJO):
+            if ancho > mejor_ancho:
+                mejor_id = bid
+                mejor_ancho = ancho
+                mejor_x = _campo(b, ("x",)) - CENTRO_IMAGE
+
+    _cam_cache = (mejor_id, mejor_x, mejor_ancho, ancho_park)
+    return _cam_cache
+
+
+def volante_camara(cam_id, cam_x):
+    objetivo = X_OBJETIVO_VERDE if cam_id == ID_VERDE else X_OBJETIVO_ROJO
+    return limitar((cam_x - objetivo) * KP_CAM, -LIMITE_CAM, LIMITE_CAM)
+
+
+# =============================================================================
+# 6. ESTACIONAMIENTO (Opcional si se mantiene activo)
+# =============================================================================
+def _reversa_hasta(condicion, ms_max):
+    t_fin = utime.ticks_ms() + ms_max
+    while utime.ticks_ms() < t_fin:
+        if condicion(actualizar_giro()):
+            return True
+        utime.sleep_ms(10)
+    return False
+
+
+def estacionar():
+    print("ESTACIONANDO (lado", "derecha" if PARK_LADO > 0 else "izquierda", ")")
+    mostrar("P")
+    pitar(600, 200)
+    traccion(0)
+    volante(0)
+    utime.sleep_ms(200)
+
+    reiniciar_giro()
+
+    volante(PARK_VOLANTE_1 * PARK_LADO)
+    traccion(-PARK_VELOCIDAD)
+    por_angulo = _reversa_hasta(lambda a: abs(a) >= PARK_ANG_1, PARK_MS_1)
+    print("fase 1:", "angulo" if por_angulo else "TOPE DE TIEMPO", round(_giro_total, 1), "grados")
+
+    traccion(0)
+    volante(PARK_VOLANTE_2 * PARK_LADO)
+    traccion(-PARK_VELOCIDAD)
+    por_angulo = _reversa_hasta(lambda a: abs(a) <= PARK_ANG_2, PARK_MS_2)
+    print("fase 2:", "angulo" if por_angulo else "TOPE DE TIEMPO", round(_giro_total, 1), "grados")
+
+    traccion(0)
+    volante(0)
+    frontal = leer_distancia(PUERTO_FRONTAL) if PUERTO_FRONTAL else DIST_MAX
+    if frontal > PARK_FRONTAL_MIN:
+        print("correccion adelante, frontal", round(frontal, 1), "cm")
+        traccion(PARK_AVANCE_VEL)
+        utime.sleep_ms(PARK_AVANCE_MS)
+
+    parar()
+    mostrar("P")
+    pitar(400, 400)
+    print("Estacionado.")
+
+
+# =============================================================================
+# 7. BANCO DE PRUEBAS
+# =============================================================================
+def prueba():
+    print("MODO PRUEBA - robot EN EL AIRE, la traccion no se mueve")
+    reiniciar_giro()
+    while not button.right.is_pressed():
+        grados, izq, der, frontal = calcular_error()
+        cam_id, cam_x, cam_ancho, ancho_park = leer_camara()
+        volante(volante_camara(cam_id, cam_x) if cam_id else grados)
+        ejes = leer_ejes()
+        print("C", round(izq, 1), " D", round(der, 1), " pared", round(grados, 1),
+            "| cam id", cam_id, " x", cam_x, " ancho", cam_ancho,
+            " park", ancho_park,
+            "| yaw", round(ejes[0], 1), " pit", round(ejes[1], 1),
+            " rol", round(ejes[2], 1), " giro", round(actualizar_giro(), 1))
+        utime.sleep_ms(250)
+    parar()
+    print("Fin del modo prueba")
+
+
+# =============================================================================
+# 8. PROGRAMA PRINCIPAL
+# =============================================================================
+def main():
+    print("WRO OBSTACULOS - SPIKE | A=camara C=izq D=der E=volante F=traccion B=frontal")
+
+    MOTOR_VOLANTE.preset(0)
+    MOTOR_VOLANTE.run_to_position(0, VEL_VOLANTE)
+    utime.sleep_ms(300)
+    traccion(0)
+
+    if MODO_PRUEBA:
+        prueba()
+        return
+
+    if ESPERAR_BOTON:
+        mostrar("-")
+        print("Listo. Pulsa el boton IZQUIERDO para arrancar.")
+        while not button.left.is_pressed():
+            utime.sleep_ms(50)
+        while button.left.is_pressed():
+            utime.sleep_ms(50)
+
+    reiniciar_giro()
+    esquinas = 0
+    mostrar(0)
+    pitar(900, 120)
+
+    t_debug = utime.ticks_ms()
+    t_inicio = utime.ticks_ms()
+    motivo = "?"
+
+    t_ultimo_rojo = 0
+    ultimo_x_rojo = X_OBJETIVO_ROJO
+
+    while True:
+        t_ciclo = utime.ticks_ms()
+
+        if button.right.is_pressed():
+            motivo = "PARO manual"
+            break
+
+        if TIEMPO_MAX_S and utime.ticks_ms() - t_inicio > TIEMPO_MAX_S * 1000:
+            motivo = "TIEMPO AGOTADO"
+            break
+
+        grados_pared, izq, der, frontal = calcular_error()
+        cam_id, cam_x, cam_ancho, ancho_park = leer_camara()
+
+        total = actualizar_giro()
+        cuenta = int(abs(total) / GRADOS_POR_ESQUINA)
+        if cuenta != esquinas:
+            esquinas = cuenta
+            pitar(1200, 80)
+            print("esquina", esquinas, " giro total", round(total, 1))
+
+        if esquinas >= ESQUINAS_FINAL:
+            motivo = "12 vueltas completadas"
+            break
+
+        if esquinas >= ESQUINAS_OBSTACULOS:
+            velocidad = VELOCIDAD_BUSQUEDA
+            mostrar("P")
+        else:
+            velocidad = VELOCIDAD
+            mostrar(esquinas // 4)
+
+        if cam_id == ID_ROJO:
+            t_ultimo_rojo = utime.ticks_ms()
+            ultimo_x_rojo = cam_x
+
+        en_memoria_rojo = (utime.ticks_ms() - t_ultimo_rojo) < TIEMPO_MEMORIA_ROJO_MS
+
+        if cam_id == ID_VERDE:
+            volante(volante_camara(ID_VERDE, cam_x))
+            mostrar("V")
+        elif cam_id == ID_ROJO or en_memoria_rojo:
+            x_a_usar = cam_x if cam_id == ID_ROJO else ultimo_x_rojo
+            volante(volante_camara(ID_ROJO, x_a_usar))
+            mostrar("R")
+        elif PUERTO_FRONTAL and frontal < DIST_FRONTAL_MIN:
+            velocidad = VELOCIDAD_FRENTE
+            volante(LIMITE_VOLANTE if der > izq else -LIMITE_VOLANTE)
+        else:
+            volante(grados_pared)
+
+        traccion(velocidad)
+
+        if DEBUG and utime.ticks_ms() - t_debug > 300:
+            t_debug = utime.ticks_ms()
+            print("C", round(izq, 1), " D", round(der, 1),
+                " pared", round(grados_pared, 1), " frontal", round(frontal, 1),
+                "| id", cam_id, " x", cam_x, " park", ancho_park,
+                "| giro", round(total, 1), " esq", esquinas,
+                " vel", velocidad,
+                " ms", utime.ticks_ms() - t_ciclo)
+
+        utime.sleep_ms(PERIODO_MS)
+
+    parar()
+    mostrar("F")
+    pitar(500, 300)
+    print("Fin:", motivo)
+    print("Esquinas:", esquinas, " giro total:", round(_giro_total, 1))
+
+
+try:
+    main()
+finally:
+    try:
+        parar()
+    except Exception:
+        pass
