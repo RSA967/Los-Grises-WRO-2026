@@ -79,15 +79,15 @@ Ever since I was a kid, robotics has always fascinated me, but it wasn’t until
 
 | Front | Back |
 |:--:|:--:|
-<img width="500" height="500" alt="image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Front%20(2).jpeg?raw=true" /> | <img width="500" height="500" alt="image" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Back%20(2).jpeg?raw=true" /> |
+<img width="500" height="500" alt="image" src="" /> | <img width="500" height="500" alt="image" src="" /> |
 
 | Bottom | Top |
 |:--:|:--:|
-| <img width="500" height="500" alt="Top" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Bottom.jpeg?raw=true" /> | <img width="500" height="500" alt="Bottom" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Top%20(2).jpeg?raw=true" /> |
+| <img width="500" height="500" alt="Top" src="" /> | <img width="500" height="500" alt="Bottom" src="" /> |
 
 | Left | Right |
 |:--:|:--:|
-| <img width="500" height="500" alt="Left" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Left%20(2).jpeg?raw=true" /> | <img width="500" height="500" alt="Right" src="https://github.com/RSA967/Los-Grises-WRO-2026/blob/main/v-photos/Right%20(2).jpeg?raw=true" /> |
+| <img width="500" height="500" alt="Left" src="" /> | <img width="500" height="500" alt="Right" src="" /> |
 
 
 |COMPONENT| DESCRIPTION | IMAGE | PURCHASE LINK|
